@@ -8,6 +8,7 @@ package 作业提交系统;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.sql.*;
 import java.sql.DriverManager;
@@ -53,12 +54,12 @@ public class Login extends javax.swing.JFrame {
 
                     rs = sql.executeQuery("select * from stu");
                     while (rs.next()) {
-                        String id = rs.getString(1);
-                        String name = rs.getString(2);
+                        String id1 = rs.getString(1);
+                        String name1 = rs.getString(2);
                         String classs = rs.getString(3);
                         String port1 = rs.getString(4);
-                        if (id.equals(idnumber)) {
-                            jTextField1.setText(name);
+                        if (id1.equals(idnumber)) {
+                            jTextField1.setText(name1);
                             port = Integer.parseInt(port1);
                             if (classs.equals("软工151")) {
                                 jComboBox1.setSelectedIndex(0);
@@ -90,7 +91,7 @@ public class Login extends javax.swing.JFrame {
                             jTextField2.setEditable(false);
                             jTextField1.setEditable(false);
                             Severurl = jFormattedTextField1.getText();
-                            jFormattedTextField1.setEditable(false);
+                            //jFormattedTextField1.setEditable(false);
                             jComboBox1.setEditable(false);
                         }
 
@@ -386,10 +387,11 @@ public class Login extends javax.swing.JFrame {
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
-        //System.out.println("启动成功！");        
+        //System.out.println("启动成功！"); 
+        Severurl = jFormattedTextField1.getText();
         try {
             //System.out.println(Severurl + port);
-           Socket mysocket = new Socket(Severurl, 6666);
+            Socket mysocket = new Socket(Severurl, 6666);
             Client client = null;
             client = new Client(mysocket);
             //Creatport(client);
@@ -408,6 +410,16 @@ public class Login extends javax.swing.JFrame {
         // TODO add your handling code here:
         if (jPasswordField1.getText().equals(passwd)) {
             //System.out.println("启动成功！！");
+            InetAddress ia = null;
+            //InetAddress ia=null;
+            try {
+                ia = ia.getLocalHost();
+                String localip = ia.getHostAddress();
+                Severurl = localip;
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
             Sever sever = new Sever();
             sever.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
             sever.setVisible(true);
@@ -439,13 +451,6 @@ public class Login extends javax.swing.JFrame {
 
     private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField2ActionPerformed
         // TODO add your handling code here:
-        //jTextField2.focusLost(FocusEvent e); 
-        //FocusEvent focus;
-        /*focus.focusLost(){
-        
-    }*/
-
-
     }//GEN-LAST:event_jTextField2ActionPerformed
 
     /**

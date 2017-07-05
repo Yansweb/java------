@@ -5,7 +5,9 @@
  */
 package 作业提交系统;
 
+//import static com.sun.corba.se.spi.presentation.rmi.StubAdapter.request;
 import java.io.*;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.logging.Level;
@@ -13,6 +15,7 @@ import java.util.logging.Logger;
 //import static java.sql.JDBCType.NULL;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -24,12 +27,29 @@ public class Sever extends javax.swing.JFrame {
      * Creates new form Sever
      */
     String savepath;
+    int numover = 0;
+
+    int socketnum = 0;
+    //List list = new ArrayList()
+    Socket socket[] = new Socket[1000];
 
     public Sever() {
         initComponents();
-        new Thread(new Runnable() {
+
+       new Thread(new Runnable() {
             public void run() {
-                while (true) {
+                while(true){
+                    InetAddress ia = null;
+                    //InetAddress ia=null;
+                    try {
+                        ia = ia.getLocalHost();
+                        String localip = ia.getHostAddress();
+                        jTextField1.setText(localip);
+                    } catch (Exception e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+
                     ServerSocket serverForClient = null;
                     Socket socketOnServer = null;
                     //DataOutputStream out = NULL;
@@ -42,38 +62,34 @@ public class Sever extends javax.swing.JFrame {
                     try {
                         serverForClient = new ServerSocket(6666);
                         socketOnServer = serverForClient.accept();
-                        /**
-                         * 定义用于在接收后在本地创建的文件对象和文件输出流对象
-                         */
-                        File file = null;
+//                        for (int i = 0; i <= socketnum; i++) {
+//                            if (socket[socketnum] == socketOnServer) {
+//                                JOptionPane.showMessageDialog(jTextField1, "你已经完成提交", "警告!", JOptionPane.WARNING_MESSAGE);
+//                            }
+//                        }
+
+                        socket[socketnum] = socketOnServer;
+                        socketnum++;
+                        System.out.println("+"+socketnum+"+");
+                        if(socketOnServer.isConnected()){
+                        
+        
+                                    File file = null;
                         FileOutputStream fos = null;
 
-                        /**
-                         * 定义输入流，使用socket的inputStream对数据包进行输入
-                         */
                         InputStream is = null;
 
-                        /**
-                         * 定义byte数组来作为数据包的存储数据包
-                         */
-                        byte[] buffer = new byte[4096 * 5];
+             
+                        byte[] buffer = new byte[1024];
 
-                        /**
-                         * 用来接收文件发送请求的字符串
-                         */
                         String comm = null;
-                        /**
-                         * 建立socekt通信，等待服务器进行连接
-                         */
-                        /**
-                         * 读取一行客户端发送过来的约定信息
-                         */
+                
                         try {
                             InputStreamReader isr = new InputStreamReader(socketOnServer.getInputStream());
                             BufferedReader br = new BufferedReader(isr);
                             comm = br.readLine();
                         } catch (IOException e) {
-                            System.out.println("服务器与客户端断开连接");
+                            JOptionPane.showMessageDialog(jTextField1, "服务器与客户端断开连接", "注意!", JOptionPane.WARNING_MESSAGE);
                         }
 
                         /**
@@ -86,7 +102,7 @@ public class Sever extends javax.swing.JFrame {
                          */
                         String xieyi = comm.substring(0, index);
                         if (!xieyi.equals("111")) {
-                            System.out.println("服务器收到的协议码不正确");
+                            JOptionPane.showMessageDialog(jTextField1, "服务器收到的协议码不正确", "注意!", JOptionPane.WARNING_MESSAGE);
                             return;
                         }
 
@@ -100,13 +116,13 @@ public class Sever extends javax.swing.JFrame {
                         /**
                          * 创建空文件，用来进行接收文件
                          */
-                        System.out.println(savepath);
+                        //System.out.println(savepath);
                         file = new File(savepath + filename);
 
                         if (!file.exists()) {
                             file.createNewFile();
                         } else {
-                            System.out.println("本路径已存在相同文件，进行覆盖");
+                            JOptionPane.showMessageDialog(jTextField1, "本路径已存在相同文件，进行覆盖", "注意!", JOptionPane.WARNING_MESSAGE);
                         }
                         try {
                             /**
@@ -116,18 +132,8 @@ public class Sever extends javax.swing.JFrame {
                             //System.out.println("sdfaskefhaskkl" + sever.savepath + file.getName() + "flaskfskhskejhfkawhfasjkd");
                             long file_size = Long.parseLong(filesize);
                             is = socketOnServer.getInputStream();
-                            /**
-                             * size为每次接收数据包的长度
-                             */
                             int size = 0;
-                            /**
-                             * count用来记录已接收到文件的长度
-                             */
                             int count = 0;
-
-                            /**
-                             * 使用while循环接收数据包
-                             */
                             while (count < file_size) {
                                 /**
                                  * 从输入流中读取一个数据包
@@ -140,16 +146,18 @@ public class Sever extends javax.swing.JFrame {
                                 count += size;
                                 System.out.println("服务器端接收到数据包，大小为" + size);
                             }
+//                            String addr = request.getRemoteAddr();
+                            serverForClient.getInetAddress();
+                            numover++;
+                            jTextField3.setText("客户端提交情况:" + "(" + numover + "人)");
 
                         } catch (FileNotFoundException e) {
-                            System.out.println("服务器写文件失败");
+                            JOptionPane.showMessageDialog(jTextField1, "服务器写文件失败", "错误!", JOptionPane.WARNING_MESSAGE);
                         } catch (IOException e) {
-                            System.out.println("服务器：客户端断开连接");
-                        } finally {
-                            /**
-                             * 将打开的文件关闭 如有需要，也可以在此关闭socket连接
-                             *
-                             */
+                            JOptionPane.showMessageDialog(jTextField1, "服务器：客户端断开连接", "注意!", JOptionPane.WARNING_MESSAGE);
+                        } 
+                        
+                        finally {
                             try {
                                 if (fos != null) {
                                     fos.close();
@@ -158,15 +166,26 @@ public class Sever extends javax.swing.JFrame {
                             }//catch (IOException e)
 
                         }
+                                
+                           
+                        
+                        //System.out.println();
 
+                        /**
+                         * 定义用于在接收后在本地创建的文件对象和文件输出流对象
+                         */
+                        
+                        }      //前面的if
                     } catch (IOException ex) {
                         ;
                     }
+                    
                 }
-
             }
-        }).start();
-    }
+        }).start(); }
+    
+    
+    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -189,11 +208,11 @@ public class Sever extends javax.swing.JFrame {
         jButton4 = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         jTextArea2 = new javax.swing.JTextArea();
-        jLabel4 = new javax.swing.JLabel();
         jButton5 = new javax.swing.JButton();
         jButton6 = new javax.swing.JButton();
         jScrollPane3 = new javax.swing.JScrollPane();
         jTextArea3 = new javax.swing.JTextArea();
+        jTextField3 = new javax.swing.JTextField();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenu2 = new javax.swing.JMenu();
@@ -226,6 +245,11 @@ public class Sever extends javax.swing.JFrame {
         });
 
         jButton2.setText("发送");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
 
         jButton3.setText("录入学生名单");
 
@@ -236,9 +260,6 @@ public class Sever extends javax.swing.JFrame {
         jTextArea2.setColumns(20);
         jTextArea2.setRows(5);
         jScrollPane2.setViewportView(jTextArea2);
-
-        jLabel4.setForeground(new java.awt.Color(255, 0, 0));
-        jLabel4.setText("客户端提交情况：（0人）");
 
         jButton5.setText("选择目录");
         jButton5.addActionListener(new java.awt.event.ActionListener() {
@@ -257,6 +278,14 @@ public class Sever extends javax.swing.JFrame {
         jTextArea3.setColumns(20);
         jTextArea3.setRows(5);
         jScrollPane3.setViewportView(jTextArea3);
+
+        jTextField3.setForeground(new java.awt.Color(255, 0, 0));
+        jTextField3.setText("客户端提交情况:(0人)");
+        jTextField3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField3ActionPerformed(evt);
+            }
+        });
 
         jMenu1.setText("设置");
         jMenuBar1.add(jMenu1);
@@ -297,9 +326,10 @@ public class Sever extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton4))
+                        .addComponent(jButton4)
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addComponent(jScrollPane2)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 189, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jTextField3))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -334,13 +364,18 @@ public class Sever extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton3)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(0, 0, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+//    class Getfile(Socket m,Socket n) implements Runnable{
+//    public void run(){
+//        
+//    }
+//}
     private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jTextField1ActionPerformed
@@ -373,11 +408,58 @@ public class Sever extends javax.swing.JFrame {
         //chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES );
 
         try {
-            Runtime.getRuntime().exec("explorer /select"+savepath);
+            //System.out.println("this" + savepath + "this");
+            //Runtime.getRuntime().exec("rundll32"+"shell32.dll"+"ShellExec_RunDLL"+savepath);
+            Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", "", savepath});
         } catch (IOException ex) {
             Logger.getLogger(Sever.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_jButton6ActionPerformed
+
+    private void jTextField3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField3ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextField3ActionPerformed
+
+//    class SeverThread {
+//
+//        private Socket so;
+//
+//        public SeverThread(Socket s) {
+//            this.so = s;
+//        }
+//
+//        public void send() {
+//
+//        }
+//
+//        public void run() {
+//
+//        }
+//    }
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+                    for (int j = 0; j < socketnum; j++) {
+                        DataOutputStream out = null;
+                        DataInputStream in = null;
+                        try {
+                            //SeverThread tt = new SeverThread(socket);
+                            
+                            System.out.println(socket[j]);
+                            in = new DataInputStream(socket[j].getInputStream());
+                            out = new DataOutputStream(socket[j].getOutputStream());
+//                String [] mess = {jTextArea3.getText()};
+//                
+//                for(int m = 0; m < mess.length; m++){
+                            out.writeUTF(jTextArea3.getText());
+                            out.flush();
+                            jTextArea3.setText("");
+                            // }
+                        } catch (IOException ex) {
+                            Logger.getLogger(Sever.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+    }//GEN-LAST:event_jButton2ActionPerformed
+
 
     /**
      * @param args the command line arguments
@@ -430,7 +512,6 @@ public class Sever extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
@@ -440,5 +521,6 @@ public class Sever extends javax.swing.JFrame {
     private javax.swing.JTextArea jTextArea3;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField2;
+    private javax.swing.JTextField jTextField3;
     // End of variables declaration//GEN-END:variables
 }

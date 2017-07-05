@@ -20,9 +20,9 @@ import javax.swing.JOptionPane;
  * @author Administrator
  */
 public class Client extends javax.swing.JFrame {
-    
+
     Login login = new Login();
-    
+
     public Client(Login login) {
         initComponents();
         this.login = login;
@@ -35,8 +35,31 @@ public class Client extends javax.swing.JFrame {
     public Client(Socket mysocket1) {
         initComponents();
         mysocket = mysocket1;
-    }
-    
+            new Thread(new Runnable() {
+                public void run() {
+                    while(true){
+                    DataOutputStream out = null;
+                    DataInputStream in = null;
+                    try {
+                        //SeverThread tt = new SeverThread(socket);
+                        in = new DataInputStream(mysocket.getInputStream());
+                        //out = new DataOutputStream(mysocket.getOutputStream());
+
+                        String s = in.readUTF();
+                        //in.close();
+                        
+                        jTextArea1.setText(s);
+                        JOptionPane.showMessageDialog(jTextArea1, "来自服务器的消息！", "提示!", JOptionPane.WARNING_MESSAGE);
+                        
+                        // }
+                    } catch (IOException ex) {
+                        Logger.getLogger(Sever.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    }
+                }
+            }).start();
+        }
+
     public Client() {
         initComponents();
     }
@@ -150,104 +173,105 @@ public class Client extends javax.swing.JFrame {
             System.out.println("文件:" + file.getAbsolutePath());
         }
         jTextField1.setText(file.getAbsolutePath());
-        
+
 
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        
-        new Thread(new Runnable() {
-            public void run() {
-                try {
-                    Thread.sleep(100);
-                    String filepath = jTextField1.getText();
-                    //System.out.println(filepath);
-                    String location = filepath.replaceAll("\\\\", "/");
-                    //System.out.println(location);
 
-                    File sendfile = new File(location);
-                    
-                    FileInputStream fis = null;
-                    byte[] buffer = new byte[1024];
-                    OutputStream os = null;
-                    
-                    if (!sendfile.exists()) {
-                        int n;
-                        n = JOptionPane.showConfirmDialog(jTextField1, "文件不存在!", "确认对话框", JOptionPane.YES_OPTION);
-                        if (n == JOptionPane.YES_OPTION) {
-                            jTextField1.setText("");
-                        }
-                        return;
-                    }
-                    
+            new Thread(new Runnable() {
+
+                public void run() {
                     try {
-                        fis = new FileInputStream(sendfile);
-                    } catch (FileNotFoundException e1) {
-                        System.out.println("输入流处出错!");
-                    }
-                    
-                    try {
-                        PrintStream ps = new PrintStream(mysocket.getOutputStream());
-                        ps.println("111/#" + sendfile.getName() + "/#" + fis.available());
-                        ps.flush();
-                    } catch (IOException e) {
-                        System.out.println("服务器连接中断");
-                    }
-                    try {
+                        Thread.sleep(100);
+                        String filepath = jTextField1.getText();
+                        //System.out.println(filepath);
+                        String location = filepath.replaceAll("\\\\", "/");
+                        //System.out.println(location);
 
-                        /**
-                         * 获取socket的OutputStream，以便向其中写入数据包
-                         */
-                        os = mysocket.getOutputStream();
+                        File sendfile = new File(location);
 
-                        /**
-                         * size 用来记录每次读取文件的大小
-                         */
-                        int size = 0;
+                        FileInputStream fis = null;
+                        byte[] buffer = new byte[1024];
+                        OutputStream os = null;
 
-                        /**
-                         * 使用while循环读取文件，直到文件读取结束
-                         */
-                        long sizefile = sendfile.length();
-                        System.out.println(sizefile);
-                        double count = 0;
-                        int nbsp;
-                        while ((size = fis.read(buffer)) != -1) {
-                            System.out.print("客户端发送数据包，大小为" + size);
-                            count = size + count;
-                            nbsp = (int) ((count / sizefile) * 100);
-                            System.out.println("   " + nbsp);
-                            jProgressBar1.setValue(nbsp);
-                            //int i = jProgressBar1.getValue();
-                            //System.out.println(i);
-                            // Thread.sleep(50);
-                            os.write(buffer, 0, size);
-                            
-                            os.flush();
-                        }
-                        //jProgressBar1.setValue(0);
-                    } catch (FileNotFoundException e) {
-                        System.out.println("客户端读取文件出错");
-                    } catch (IOException e) {
-                        System.out.println("客户端输出文件出错");
-                    } //        catch (InterruptedException ex) {
-                    //            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
-                    //        } 
-                    finally {
-                        
-                        try {
-                            if (fis != null) {
-                                fis.close();
+                        if (!sendfile.exists()) {
+                            int n;
+                            n = JOptionPane.showConfirmDialog(jTextField1, "文件不存在!", "确认对话框", JOptionPane.YES_OPTION);
+                            if (n == JOptionPane.YES_OPTION) {
+                                jTextField1.setText("");
                             }
-                        } catch (IOException e) {
-                            System.out.println("客户端文件关闭出错");
-                        }//catch (IOException e)
-                    }
-                } catch (InterruptedException ie) {
-                }
-            }
-        }).start();
+                            return;
+                        }
 
+                        try {
+                            fis = new FileInputStream(sendfile);
+                        } catch (FileNotFoundException e1) {
+                            System.out.println("输入流处出错!");
+                        }
+
+                        try {
+                            PrintStream ps = new PrintStream(mysocket.getOutputStream());
+                            ps.println("111/#" + sendfile.getName() + "/#" + fis.available());
+                            ps.flush();
+                        } catch (IOException e) {
+                            System.out.println("服务器连接中断");
+                        }
+                        try {
+
+                            /**
+                             * 获取socket的OutputStream，以便向其中写入数据包
+                             */
+                            os = mysocket.getOutputStream();
+
+                            /**
+                             * size 用来记录每次读取文件的大小
+                             */
+                            int size = 0;
+
+                            /**
+                             * 使用while循环读取文件，直到文件读取结束
+                             */
+                            long sizefile = sendfile.length();
+                            //System.out.println(sizefile);
+                            double count = 0;
+                            int nbsp;
+                            while ((size = fis.read(buffer)) != -1) {
+                                System.out.println("客户端发送数据包，大小为" + size);
+                                count = size + count;
+                                nbsp = (int) ((count / sizefile) * 100);
+                                //System.out.println("   " + nbsp);
+                                jProgressBar1.setValue(nbsp);
+                                //int i = jProgressBar1.getValue();
+                                //System.out.println(i);
+                                Thread.sleep(50);
+                                os.write(buffer, 0, size);
+
+                                os.flush();
+                            }
+
+                            //jProgressBar1.setValue(0);
+                        } catch (FileNotFoundException e) {
+                            System.out.println("客户端读取文件出错");
+                        } catch (IOException e) {
+                            System.out.println("客户端输出文件出错");
+                        } //        catch (InterruptedException ex) {
+                        //            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+                        //        } 
+                        finally {
+
+                            try {
+                                if (fis != null) {
+                                    fis.close();
+                                }
+                            } catch (IOException e) {
+                                System.out.println("客户端文件关闭出错");
+                            }//catch (IOException e)
+                        }
+                    } catch (InterruptedException ie) {
+                    }
+                }
+            }).start();
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
